@@ -58,6 +58,39 @@ $(".list-group").on("click","p", function() {
   textInput.trigger("focus");
 });
 
+//modal is fully visible
+$("#task-form-modal").on("shown.bs.modal", function() {
+  //clear values
+  $("#modalTaskDescription, #modalDueDate").val("");
+});
+
+//modal is fully visible
+$("#task-form-modal").on("shown-bs-modal", function(){
+  //highlight textarea
+  $("#modalTaskDescription").trigger("focus");
+});
+
+//save button in modal was clicked
+$("#task-form-modal .btn-primary").click(function(){
+  //get form values
+  var taskText = $("#modalTaskDescription").val();
+  var taskData = $("#modalDueDate").val();
+
+  if (taskText && taskDate) {
+    createTask(taskText, taskDate, "toDo");
+
+    //close modal
+    $("#task-form-modal").modal("hide");
+
+    //save in tasks array
+    tasks.toDo.push({
+      text: taskText,
+      date: taskDate
+    });
+    saveTasks();
+  }
+});
+
 $(".list-group").on("blur", "textarea", function(){
    //get the textarea's current value/text
    var text = $(this)
@@ -66,7 +99,7 @@ $(".list-group").on("blur", "textarea", function(){
    
    //get the parent ul's Id attribute
    var status = $(this)
-   .closest("list-group")
+   .closest(".list-group")
    .attr("id")
    .replace("list-", "");
 
