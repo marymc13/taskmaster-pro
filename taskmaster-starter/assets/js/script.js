@@ -10,18 +10,20 @@ var createTask = function(taskText, taskDate, taskList) {
     .addClass("m-1")
     .text(taskText);
 
-  // append span and p element to parent li
+// append span and p element to parent li
   taskLi.append(taskSpan, taskP);
 
+//check due date
+auditTask(taskLi);
 
-  // append to ul list on the page
+// append to ul list on the page
   $("#list-" + taskList).append(taskLi);
 };
 
 var loadTasks = function() {
   tasks = JSON.parse(localStorage.getItem("tasks"));
 
-  // if nothing in localStorage, create a new object to track all task status arrays
+// if nothing in localStorage, create a new object to track all task status arrays
   if (!tasks) {
     tasks = {
       toDo: [],
@@ -91,7 +93,7 @@ $("#task-form-modal .btn-primary").click(function(){
   }
 });
 
-$(".list-group").on("blur", "textarea", function(){
+$(".list-group").on("change", "input[type='text']", function(){
    //get the textarea's current value/text
    var text = $(this)
    .val()
@@ -122,21 +124,24 @@ $(".list-group").on("blur", "textarea", function(){
    //due date was clicked
    $(".list-group").on("click", "span", function(){
     //get current text
-    var date = $(this)
-    .text()
-    .trin();
-
+    var date = $(this).text().trim();
     //create new input element
     var dateInput = $("<input>")
     .attr("type", "text")
-    .addClass("form-control")
+    .addCLass("form-control")
     .val(date);
-
     //swap out elements
     $(this).replaceWith(dateInput)
+    //enable jquery UI datepicker
+    dateInput.datepicker({
+      minDate: 1,
+      onClose: function() {
+        $(this).trigger("change");
+      }
+    });
 
-    //automatically focus on new element
-    dateInout.trigger("focus");
+    //automatically bring up the calendar
+    dateInput.trigger("focus");
    });
 
    //value of due date was changed
@@ -219,6 +224,31 @@ stop: function(event) {
 }
    });
 
+   //Date Picker
+   $("#modalDueDate").datepicker({
+    minDate: 1
+   });
+
+   var auditTask = function(taskEl) {
+    //get date from task element
+    var date = $(taskEl).find("span").text().trim();
+    //to ensure element is getting to the function
+   
+    //convert to moment object at 5:00pm
+    var time = moment(date, "L").set("hour", 17);
+    //this should print out an object for the value of the date variable, but at 5:00pm at that date
+    console.log(time);
+
+    $(taskEl).removeClass("list-group-item-warning list-group-item-danger");
+
+    //apply new class if task is near/overdue date
+    if (moment().isAfter(time)) {
+      $(taskEl).addCLass("list-group-item-danger");
+    }
+    else if (Math.abs(moment().diff(time, "days")) <= 2) {
+       $(taskEl).addCLass("list-group-item-warning");
+    }
+  };
    //Trash Can
    $("#trash").droppable({
     accept: ".card .list-group-item",
